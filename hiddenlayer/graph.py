@@ -85,13 +85,13 @@ class Node():
         if "kernel_shape" in self.params:
             # Kernel
             kernel = self.params["kernel_shape"]
-            title += "x".join(map(str, kernel))
-        if "stride" in self.params:
-            stride = self.params["stride"]
-            if np.unique(stride).size == 1:
-                stride = stride[0]
-            if stride != 1:
-                title += "/s{}".format(str(stride))
+            title += ", kernel_size: " + str(kernel)
+        if "strides" in self.params:
+            strides = self.params["strides"]
+            title += ", stride: " + str(strides)
+
+        #if self.op == 'BatchNorm' or self.op == 'LeakyRelu':
+        #    title += " " + str(self.params)
         #         # Transposed
         #         if node.transposed:
         #             name = "Transposed" + name
