@@ -53,13 +53,16 @@ def get_shape(torch_node):
     # https://discuss.pytorch.org/t/node-output-shape-from-trace-graph/24351/2
     # TODO: find a better way to extract output shape
     # TODO: Assuming the node has one output. Update if we encounter a multi-output node.
-    m = re.match(r".*Float\(([\d\s\,]+)\).*", str(next(torch_node.outputs())))
-    if m:
-        shape = m.group(1)
-        shape = shape.split(",")
-        shape = tuple(map(int, shape))
-    else:
-        shape = None
+    try:
+        shape = torch_node.output().type().sizes()
+    except:
+        m = re.match(r".*Float\(([\d\s\,]+)\).*", str(next(torch_node.outputs())))
+        if m:
+            shape = m.group(1)
+            shape = shape.split(",")
+            shape = tuple(map(int, shape))
+        else:
+            shape = None
     return shape
 
 
@@ -90,6 +93,7 @@ def import_graph(hl_graph, model, args, input_names=None, verbose=False):
             params = {k: torch_node[k] for k in torch_node.attributeNames()}
         except Exception as e:
             params = {k: getattr(torch_node, torch_node.kindOf(k))(k) for k in torch_node.attributeNames()}
+
         # Inputs/outputs
         # TODO: inputs = [i.unique() for i in node.inputs()]
         outputs = [o.unique() for o in torch_node.outputs()]
